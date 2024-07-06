@@ -9,7 +9,11 @@ async function ActionHomePage({ params }: { params: { id: string } }) {
     if (session.isLoggedIn) {
         return (
             <div>
-                <Auction username={session.username} itemId={params.id} />
+                <Auction
+                    username={session.username}
+                    tocken={session.token}
+                    itemId={params.id}
+                />
             </div>
         );
     }

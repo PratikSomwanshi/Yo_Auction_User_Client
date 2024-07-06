@@ -6,6 +6,8 @@ import BidForm from "./bidForm";
 import BidsList from "./bidList";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { getSession, logOut } from "@/utils/actions";
 
 interface Bid {
     amount: number;
@@ -16,9 +18,11 @@ interface Bid {
 const Auction = ({
     username,
     itemId,
+    tocken,
 }: {
     username: string | undefined;
     itemId: string;
+    tocken: string;
 }) => {
     const [currentHighestBid, setCurrentHighestBid] = useState(0);
     const [allBids, setAllBids] = useState<Bid[]>([]);
@@ -26,9 +30,11 @@ const Auction = ({
     const [errorMessage, setErrorMessage] = useState("");
     const [webSocketError, setWebSocketError] = useState("");
 
+    const queryClient = useQueryClient();
+
     const socket: Socket = io("http://localhost:8000/auction", {
         auth: {
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcyMDA4ODI5Mn0.t4SF0mbg2qIdEKZRPdEYjnw6zU3gj4Zz9NV-23ciirA",
+            token: tocken,
         },
     });
     useEffect(() => {
@@ -38,15 +44,20 @@ const Auction = ({
             setWebSocketError("");
         });
 
-        socket.on("connect_error", (error) => {
+        socket.on("connect_error", async (error: any) => {
+            if (error.data.content) {
+                await logOut();
+            }
             console.error("Connection error:", error);
-            setWebSocketError("Connection error: Unable to connect to server.");
+            setWebSocketError("Connection error: " + error.message);
         });
 
         socket.on("highestBid", (data) => {
             if (data.message) {
                 setCurrentHighestBid(0);
+                queryClient.invalidateQueries({ queryKey: ["item"] });
             } else {
+                queryClient.invalidateQueries({ queryKey: ["item"] });
                 console.log("Highest bid received:", data);
                 setCurrentHighestBid(data.amount);
             }
@@ -63,8 +74,13 @@ const Auction = ({
         });
 
         socket.on("error", (error) => {
-            console.error("Error:", error);
+            console.error("Error:", error.message);
             setWebSocketError("Error: " + error.message);
+        });
+
+        socket.on("itemSold", () => {
+            console.log("Item sold");
+            setWebSocketError("Item has been sold.");
         });
 
         if (currentBid) {
@@ -109,6 +125,7 @@ const Auction = ({
                     socket={socket}
                     username={username}
                     errorMessage={errorMessage}
+                    itemId={itemId}
                 />
             </section>
 
@@ -123,7 +140,7 @@ const Auction = ({
                                 <span>Error</span>
                             </span>
                         </AlertTitle>
-                        <AlertDescription>{errorMessage}</AlertDescription>
+                        <AlertDescription>{webSocketError}</AlertDescription>
                     </Alert>
                 </div>
             )}
