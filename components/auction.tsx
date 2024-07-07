@@ -43,15 +43,14 @@ const Auction = ({
     );
     useEffect(() => {
         socket.on("connect", () => {
- 
             socket.emit("getHighestBid", itemId);
             setWebSocketError("");
         });
 
         socket.on("connect_error", async (error: any) => {
-            if (error.data?.content) {
-                await logOut();
-            }
+            // if (error.data?.content) {
+            //     await logOut();
+            // }
             console.error("Connection error:", error);
             setWebSocketError("Connection error: " + error.message);
         });
@@ -62,13 +61,12 @@ const Auction = ({
                 queryClient.invalidateQueries({ queryKey: ["item"] });
             } else {
                 queryClient.invalidateQueries({ queryKey: ["item"] });
- 
+
                 setCurrentHighestBid(data.amount);
             }
         });
 
         socket.on("bid", (newBid: Bid) => {
- 
             setAllBids((prevBids) => [...prevBids, newBid]);
         });
 
@@ -83,7 +81,6 @@ const Auction = ({
         });
 
         socket.on("itemSold", () => {
- 
             setWebSocketError("Item has been sold.");
         });
 
