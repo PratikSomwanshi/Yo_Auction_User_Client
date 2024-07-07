@@ -48,6 +48,35 @@ export const login = async (data: loginData) => {
     throw new CustomError(res.message);
 };
 
+export const register = async (data: loginData) => {
+    const session = await getSession();
+
+    const response = await fetch("http://localhost:8000/auth/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+        session.username = res.username;
+        session.token = res.token;
+        session.isLoggedIn = true;
+        await session.save();
+        redirect("/");
+        return;
+    }
+
+    if (res.error.explanation) {
+        throw new CustomError(res.error.explanation);
+    } else {
+        throw new CustomError("Something went wrong");
+    }
+};
+
 export const logOut = async () => {
     const session = await getSession();
     session.destroy();

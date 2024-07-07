@@ -1,29 +1,22 @@
 import React from "react";
 import Auction from "@/components/auction";
 import { getSession } from "@/utils/actions";
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
 async function ActionHomePage({ params }: { params: { id: string } }) {
     const session = await getSession();
 
-    if (session.isLoggedIn) {
-        return (
-            <div>
-                <Auction
-                    username={session.username}
-                    tocken={session.token}
-                    itemId={params.id}
-                />
-            </div>
-        );
+    if (!session.isLoggedIn) {
+        redirect("/login");
     }
 
     return (
         <div>
-            <h1>Home Page</h1>
-            <p>
-                <Link href="/login">Log in</Link> to access the auction
-            </p>
+            <Auction
+                username={session.username}
+                tocken={session.token}
+                itemId={params.id}
+            />
         </div>
     );
 }

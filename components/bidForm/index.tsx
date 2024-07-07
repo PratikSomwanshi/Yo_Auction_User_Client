@@ -6,7 +6,7 @@ import { getSession } from "@/utils/actions";
 import { IronSession } from "iron-session";
 import { SessionData } from "@/utils/lib";
 import useStore from "@/store";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 
 interface BidFormProps {
     currentHighestBid: number;
@@ -15,6 +15,7 @@ interface BidFormProps {
     username: string | undefined;
     errorMessage: string;
     itemId: string;
+    itemResponse: UseQueryResult<any, Error>;
 }
 
 const BidForm = ({
@@ -24,6 +25,7 @@ const BidForm = ({
     username,
     errorMessage,
     itemId,
+    itemResponse,
 }: BidFormProps) => {
     const [amount, setAmount] = useState("");
 
@@ -48,6 +50,15 @@ const BidForm = ({
             return;
         }
 
+        // console.log(itemResponse);
+
+        if (!(itemResponse.data.initialAmount < parseInt(amount))) {
+            setErrorMessage(
+                `Bid amount must be greater than the initial amount of $${itemResponse.data.initialAmount}.`
+            );
+            return;
+        }
+
         console.log("Placing bid...");
         const bid = {
             amount: parseFloat(amount),
@@ -59,42 +70,30 @@ const BidForm = ({
         socket.emit("bid", bid);
     };
 
-    const fetchItem = async () => {
-        const response = await fetch(`http://localhost:8000/items/${itemId}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        if (!response.ok) {
-            throw new Error("No data found");
-        }
-        const res = await response.json();
-        console.log(res);
-        return res.data;
-    };
-
-    const itemResponse = useQuery({
-        queryKey: ["item"],
-        queryFn: fetchItem,
-    });
-
     if (itemResponse.isLoading) return <div>Loading...</div>;
 
     return (
         <form id="bidForm" onSubmit={placeBid} className="w-[50%] space-y-2">
-            <div className="bg-white w-full h-44 rounded-sm">
-                <img alt="image" />
+            <div className="bg-white w-full h-44 rounded-sm overflow-hidden">
+                {/* {JSON.stringify(itemResponse.data.imageUrl)} */}
+                <img
+                    alt="image"
+                    src={itemResponse.data.imageUrl.medium}
+                    className="w-full h-full object-cover object-top  bg-slate-200 mb-2"
+                />
             </div>
 
             <br />
-            <label htmlFor="amount">Bid Amount:</label>
+            <label htmlFor="amount">
+                {itemResponse.data.status == "sold" ? "" : "Bid Amount:"}
+            </label>
             <Input
-                className="bg-gray-50"
+                className="bg-white"
                 type="number"
                 id="amount"
                 name="amount"
                 value={amount}
+                disabled={itemResponse.data.status == "sold"}
                 onChange={(e) => {
                     setErrorMessage("");
                     setAmount(e.target.value);

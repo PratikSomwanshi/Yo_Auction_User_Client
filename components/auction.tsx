@@ -6,8 +6,9 @@ import BidForm from "./bidForm";
 import BidsList from "./bidList";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSession, logOut } from "@/utils/actions";
+import Logo from "./logo";
 
 interface Bid {
     amount: number;
@@ -22,7 +23,7 @@ const Auction = ({
 }: {
     username: string | undefined;
     itemId: string;
-    tocken: string;
+    tocken: string | undefined;
 }) => {
     const [currentHighestBid, setCurrentHighestBid] = useState(0);
     const [allBids, setAllBids] = useState<Bid[]>([]);
@@ -45,7 +46,7 @@ const Auction = ({
         });
 
         socket.on("connect_error", async (error: any) => {
-            if (error.data.content) {
+            if (error.data?.content) {
                 await logOut();
             }
             console.error("Connection error:", error);
@@ -99,17 +100,57 @@ const Auction = ({
         };
     }, []);
 
+    type FetchItemParams = {
+        queryKey: [string, { id: string }];
+    };
+
+    const fetchItems = async ({ queryKey }: FetchItemParams) => {
+        const [_key, { id }] = queryKey;
+        const response = await fetch(`http://localhost:8000/items/${id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            throw new Error("No data found");
+        }
+        const res = await response.json();
+        return res.data;
+    };
+
+    const itemResponse = useQuery({
+        queryKey: ["item", { id: itemId }],
+        queryFn: fetchItems,
+        refetchInterval: 300000,
+    });
+
+    if (itemResponse.isLoading)
+        return (
+            <div className="w-screen h-[90vh] flex justify-center items-center">
+                <Logo width={200} height={200} animation={true} />
+            </div>
+        );
+
+    if (itemResponse.isError)
+        return (
+            <div className="w-screen h-[90vh] flex justify-center items-center text-2xl font-semibold">
+                Something went wrong
+            </div>
+        );
+
     return (
         <div className="flex  w-screen h-[calc(100vh-8vh)]">
             <section className="flex-1 ml-2">
                 <h2 className="text-xl mt-4 mb-3">All Bids</h2>
-                <div
-                    id="highestBid"
-                    className="bg-slate-100  rounded-md px-1 py-2">
-                    Highest Bid:{" "}
+                <div id="highestBid" className="bg-slate-100  px-1 py-2 mb-2">
+                    Highest Bid:
                     {currentHighestBid !== 0
-                        ? `$${currentHighestBid}`
+                        ? `₹${currentHighestBid}`
                         : "No bids placed yet"}
+                </div>
+                <div className="bg-slate-100  px-1 py-2">
+                    <h3>Starting Bid: ₹{itemResponse.data.initialAmount}</h3>
                 </div>
                 <br />
                 <br />
@@ -126,6 +167,7 @@ const Auction = ({
                     username={username}
                     errorMessage={errorMessage}
                     itemId={itemId}
+                    itemResponse={itemResponse}
                 />
             </section>
 
