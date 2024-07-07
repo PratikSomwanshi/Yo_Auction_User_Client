@@ -22,7 +22,7 @@ function Login() {
             setErrorMessage("Username and password are required.");
             return;
         }
-        console.log("username", username, "password", password);
+
         try {
             const res: any = await login({ username, password });
         } catch (error: any) {

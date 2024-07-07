@@ -33,14 +33,17 @@ const Auction = ({
 
     const queryClient = useQueryClient();
 
-    const socket: Socket = io("http://localhost:8000/auction", {
-        auth: {
-            token: tocken,
-        },
-    });
+    const socket: Socket = io(
+        `${process.env.NEXT_PUBLIC_BIDDING_SERVICE_URL}/auction`,
+        {
+            auth: {
+                token: tocken,
+            },
+        }
+    );
     useEffect(() => {
         socket.on("connect", () => {
-            console.log("Connected to server");
+ 
             socket.emit("getHighestBid", itemId);
             setWebSocketError("");
         });
@@ -59,13 +62,13 @@ const Auction = ({
                 queryClient.invalidateQueries({ queryKey: ["item"] });
             } else {
                 queryClient.invalidateQueries({ queryKey: ["item"] });
-                console.log("Highest bid received:", data);
+ 
                 setCurrentHighestBid(data.amount);
             }
         });
 
         socket.on("bid", (newBid: Bid) => {
-            console.log("New bid received:", newBid);
+ 
             setAllBids((prevBids) => [...prevBids, newBid]);
         });
 
@@ -80,7 +83,7 @@ const Auction = ({
         });
 
         socket.on("itemSold", () => {
-            console.log("Item sold");
+ 
             setWebSocketError("Item has been sold.");
         });
 
@@ -106,12 +109,15 @@ const Auction = ({
 
     const fetchItems = async ({ queryKey }: FetchItemParams) => {
         const [_key, { id }] = queryKey;
-        const response = await fetch(`http://localhost:8000/items/${id}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BIDDING_SERVICE_URL}/items/${id}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         if (!response.ok) {
             throw new Error("No data found");
         }

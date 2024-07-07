@@ -7,17 +7,20 @@ import React, { useEffect } from "react";
 
 function Home() {
     const fetchItem = async () => {
-        const response = await fetch("http://localhost:8000/items", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BIDDING_SERVICE_URL}/items`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         if (!response.ok) {
             throw new Error("No data found");
         }
         const res = await response.json();
-        console.log(res);
+
         return res.data;
     };
 

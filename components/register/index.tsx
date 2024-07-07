@@ -28,12 +28,12 @@
 //             return;
 //         }
 
-//         console.log("username", username, "password", password);
+//
 //         try {
 //             const res: any = await register({ username, password });
 //             // Handle successful registration (e.g., redirect to login page)
 //         } catch (error: any) {
-//             console.log(error);
+//
 //             if (error.message == "fetch failed") {
 //                 setErrorMessage(
 //                     "Unable to connect to the server. Please try again later."
@@ -128,12 +128,10 @@ function Register() {
             return;
         }
 
-        console.log("username", username, "password", password);
         try {
             const res: any = await register({ username, password });
             // Handle successful registration (e.g., redirect to login page)
         } catch (error: any) {
-            console.log(error);
             if (error.message === "fetch failed") {
                 setErrorMessage(
                     "Unable to connect to the server. Please try again later."

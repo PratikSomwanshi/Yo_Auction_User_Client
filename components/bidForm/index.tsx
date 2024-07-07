@@ -50,7 +50,7 @@ const BidForm = ({
             return;
         }
 
-        // console.log(itemResponse);
+        //
 
         if (!(itemResponse.data.initialAmount < parseInt(amount))) {
             setErrorMessage(
@@ -59,7 +59,6 @@ const BidForm = ({
             return;
         }
 
-        console.log("Placing bid...");
         const bid = {
             amount: parseFloat(amount),
             userId: username,

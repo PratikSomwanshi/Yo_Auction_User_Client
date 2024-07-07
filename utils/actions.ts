@@ -26,13 +26,16 @@ interface loginData {
 export const login = async (data: loginData) => {
     const session = await getSession();
 
-    const response = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
+    const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BIDDING_SERVICE_URL}/auth/login`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        }
+    );
 
     const res = await response.json();
 
@@ -51,13 +54,16 @@ export const login = async (data: loginData) => {
 export const register = async (data: loginData) => {
     const session = await getSession();
 
-    const response = await fetch("http://localhost:8000/auth/register", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
+    const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BIDDING_SERVICE_URL}/auth/register`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        }
+    );
 
     const res = await response.json();
 
