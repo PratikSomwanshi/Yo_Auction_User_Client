@@ -43,6 +43,7 @@ const Auction = ({
     );
     useEffect(() => {
         socket.on("connect", () => {
+            socket.emit("joinItemRoom", itemId);
             socket.emit("getHighestBid", itemId);
             setWebSocketError("");
         });
