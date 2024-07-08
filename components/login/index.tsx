@@ -25,8 +25,13 @@ function Login() {
 
         try {
             const res: any = await login({ username, password });
-        } catch (error: any) {
-            setErrorMessage(error.message);
+
+            if (res.error) {
+                setErrorMessage(res.error);
+                return;
+            }
+        } catch (error) {
+            setErrorMessage("Something went wrong. Please try again.");
         }
     };
 

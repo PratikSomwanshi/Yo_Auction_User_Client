@@ -48,7 +48,9 @@ export const login = async (data: loginData) => {
         return;
     }
 
-    throw new CustomError(res.message);
+    return {
+        error: res.message,
+    };
 };
 
 export const register = async (data: loginData) => {
@@ -76,11 +78,9 @@ export const register = async (data: loginData) => {
         return;
     }
 
-    if (res.error.explanation) {
-        throw new CustomError(res.error.explanation);
-    } else {
-        throw new CustomError("Something went wrong");
-    }
+    return {
+        error: res.error.explanation,
+    };
 };
 
 export const logOut = async () => {

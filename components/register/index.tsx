@@ -131,11 +131,14 @@ function Register() {
         try {
             const res: any = await register({ username, password });
             // Handle successful registration (e.g., redirect to login page)
+
+            if (res.error) {
+                setErrorMessage(res.error);
+                return;
+            }
         } catch (error: any) {
             if (error.message === "fetch failed") {
-                setErrorMessage(
-                    "Unable to connect to the server. Please try again later."
-                );
+                setErrorMessage("Something went wrong. Please try again.");
             } else {
                 setErrorMessage(error.message);
             }
