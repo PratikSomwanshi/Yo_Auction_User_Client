@@ -108,7 +108,7 @@ const Auction = ({
     const fetchItems = async ({ queryKey }: FetchItemParams) => {
         const [_key, { id }] = queryKey;
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_BIDDING_SERVICE_URL}/items/${id}`,
+            `${process.env.NEXT_PUBLIC_BIDDING_SERVICE_URL}/items/id/${id}`,
             {
                 method: "GET",
                 headers: {
